@@ -31,7 +31,60 @@ function load_mailbox(mailbox) {
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+
+  // Get emails from mailbox
+  fetch(`/emails/${mailbox}`)
+  .then(response => response.json())
+  .then(emails => {
+    // Print emails
+    console.log(emails);
+
+    emails.forEach(element => {
+
+      // Get data
+      const from = element.sender;
+      const subject = element.subject;
+      const timestamp = element.timestamp;
+
+      // Create email element and assign properties/values/attributes
+      const email = document.createElement('div');
+      email.className = 'email';
+      email.innerHTML = `<p>From: ${from}</p>
+                        <p>Subject: ${subject}<p/>
+                        <p>Time: ${timestamp}</p>`;
+
+      // If read, set background color to gray
+      if (element.read) {
+        email.style.backgroundColor = "lightgray";
+      } else {
+        email.style.backgroundColor = "white";
+      };
+      
+      document.querySelector('#emails-view').append(email);
+    });
+  })
+
 }
+
+// fetch('/emails/inbox')
+// .then(response => response.json())
+// .then(emails => {
+//     // Print emails
+//     console.log(emails);
+
+//     // ... do something else with emails ...
+// });
+// {
+//   "id": 100,
+//   "sender": "foo@example.com",
+//   "recipients": ["bar@example.com"],
+//   "subject": "Hello!",
+//   "body": "Hello, world!",
+//   "timestamp": "Jan 2 2020, 12:00 AM",
+//   "read": false,
+//   "archived": false
+// }
+
 
 function submit_email(event) {
   event.preventDefault();

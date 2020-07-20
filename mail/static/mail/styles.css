@@ -2,7 +2,11 @@ textarea {
     min-height: 400px;
 }
 
-.email {
+.emails-list {
     border-style: solid;
     margin-bottom: 1%;
+}
+
+.email {
+    border-style: solid;
 }

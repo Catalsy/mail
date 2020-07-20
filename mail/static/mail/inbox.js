@@ -15,6 +15,7 @@ function compose_email() {
 
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
 
   // Clear out composition fields
@@ -28,6 +29,7 @@ function load_mailbox(mailbox) {
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
@@ -40,16 +42,20 @@ function load_mailbox(mailbox) {
     emails.forEach(element => {
 
       // Get email data
+      const id = element.id;
       const sender = element.sender;
       const subject = element.subject;
       const timestamp = element.timestamp;
 
       // Create email element and assign attribute/value
       const email = document.createElement('div');
-      email.className = 'email';
+      email.className = 'emails-list';
       email.innerHTML = `<p>From: ${sender}</p>
                         <p>Subject: ${subject}<p/>
                         <p>Time: ${timestamp}</p>`;
+
+      // Atach event listener to read email
+      email.addEventListener('click', () => load_email(id));
 
       // If read, set background color to gray, else to white
       if (element.read) {
@@ -61,10 +67,11 @@ function load_mailbox(mailbox) {
       document.querySelector('#emails-view').append(email);
     });
   })
-
 }
 
+
 function submit_email(event) {
+  // Do not refresh page
   event.preventDefault();
 
   // Get values from form fields
@@ -86,4 +93,70 @@ function submit_email(event) {
 
   // Load "Sent" mailbox after sending an email
   load_mailbox('sent');
+}
+
+
+function load_email(id) {
+  
+  // Check if there is already another email in the DOM
+  if (document.querySelector('.email')) {
+
+    // Remove such element
+    const emailToRemove = document.querySelector('.email');
+    document.querySelector('#email-view').removeChild(emailToRemove);
+
+  };
+
+  // show email-view and hide other views
+  document.querySelector('#email-view').style.display = 'block';
+  document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#emails-view').style.display = 'none';
+
+  // Get email content
+  fetch (`/emails/${id}`)
+  .then(res => res.json())
+  .then(email => {
+
+    // Create elements for email content
+    const sender = document.createElement('p');
+    sender.innerHTML = `Sender: ${email.sender}`;
+    sender.style.fontWeight = 'bold';
+
+    const recipients = document.createElement('p');
+    recipients.innerHTML = `Recipients: ${email.recipients}`;
+
+    const subject = document.createElement('p');
+    subject.innerHTML = `Subject: ${email.subject}`;
+    subject.style.fontWeight = 'bold';
+
+    const timestamp = document.createElement('p');
+    timestamp.innerHTML = email.timestamp;
+
+    const body = document.createElement('p');
+    body.innerHTML = email.body;
+
+    // Create div element to show email
+    const displayEmail = document.createElement('div');
+    displayEmail.className = 'email';
+    
+    // Append elements to email
+    displayEmail.appendChild(sender);
+    displayEmail.appendChild(timestamp);
+    displayEmail.appendChild(recipients);
+    displayEmail.appendChild(subject);
+    displayEmail.appendChild(body);
+
+    // Append email to email-view
+    document.querySelector('#email-view').appendChild(displayEmail);
+
+  })
+
+  // Set read propertie to true
+  fetch(`/emails/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+        read: true
+    })
+  })
+
 }

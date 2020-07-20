@@ -36,24 +36,22 @@ function load_mailbox(mailbox) {
   fetch(`/emails/${mailbox}`)
   .then(response => response.json())
   .then(emails => {
-    // Print emails
-    console.log(emails);
 
     emails.forEach(element => {
 
-      // Get data
-      const from = element.sender;
+      // Get email data
+      const sender = element.sender;
       const subject = element.subject;
       const timestamp = element.timestamp;
 
-      // Create email element and assign properties/values/attributes
+      // Create email element and assign attribute/value
       const email = document.createElement('div');
       email.className = 'email';
-      email.innerHTML = `<p>From: ${from}</p>
+      email.innerHTML = `<p>From: ${sender}</p>
                         <p>Subject: ${subject}<p/>
                         <p>Time: ${timestamp}</p>`;
 
-      // If read, set background color to gray
+      // If read, set background color to gray, else to white
       if (element.read) {
         email.style.backgroundColor = "lightgray";
       } else {
@@ -66,30 +64,10 @@ function load_mailbox(mailbox) {
 
 }
 
-// fetch('/emails/inbox')
-// .then(response => response.json())
-// .then(emails => {
-//     // Print emails
-//     console.log(emails);
-
-//     // ... do something else with emails ...
-// });
-// {
-//   "id": 100,
-//   "sender": "foo@example.com",
-//   "recipients": ["bar@example.com"],
-//   "subject": "Hello!",
-//   "body": "Hello, world!",
-//   "timestamp": "Jan 2 2020, 12:00 AM",
-//   "read": false,
-//   "archived": false
-// }
-
-
 function submit_email(event) {
   event.preventDefault();
 
-  // Get values from fields
+  // Get values from form fields
   const recipients = document.querySelector('#compose-recipients').value;
   const subject = document.querySelector('#compose-subject').value;
   const body = document.querySelector('#compose-body').value;
@@ -98,14 +76,14 @@ function submit_email(event) {
   fetch('/emails', {
     method: 'POST',
     body: JSON.stringify({
-        recipients: recipients,
-        subject: subject,
-        body: body
+        recipients,
+        subject,
+        body
     })
   })
   .then(response => response.json())
   .then(result => console.log(result))
 
+  // Load "Sent" mailbox after sending an email
   load_mailbox('sent');
-  
 }

@@ -55,7 +55,7 @@ function load_mailbox(mailbox) {
                         <p>Time: ${timestamp}</p>`;
 
       // Atach event listener to read email
-      email.addEventListener('click', () => load_email(id));
+      email.addEventListener('click', () => load_email(mailbox, id));
 
       // If read, set background color to gray, else to white
       if (element.read) {
@@ -96,7 +96,7 @@ function submit_email(event) {
 }
 
 
-function load_email(id) {
+function load_email(mailbox, id) {
   
   // Check if there is already another email in the DOM
   if (document.querySelector('.email')) {
@@ -145,6 +145,49 @@ function load_email(id) {
     displayEmail.appendChild(recipients);
     displayEmail.appendChild(subject);
     displayEmail.appendChild(body);
+
+    if (mailbox != 'sent') {
+
+      // Create archive/unarchive button
+      const archButton = document.createElement('button');
+
+      if (mailbox == 'inbox') {
+        archButton.innerHTML = 'Archive';
+
+        // Archive message when button is clicked
+        archButton.addEventListener('click', () => {
+          fetch(`/emails/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                archived: true
+            })
+          })
+
+          // Load inbox after clicking button
+          load_mailbox('inbox');
+        });
+      } 
+
+      // If the mailbox is Archive
+      else {
+        archButton.innerHTML = 'Unarchive';
+        
+        archButton.addEventListener('click', () => {
+          fetch(`/emails/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                archived: false
+            })
+          })
+
+          // Load inbox after clicking button
+          load_mailbox('inbox');
+        });
+      }
+
+      // Insert at the beginning of the div 
+      displayEmail.insertBefore(archButton, displayEmail.childNodes[0]);
+    }
 
     // Append email to email-view
     document.querySelector('#email-view').appendChild(displayEmail);

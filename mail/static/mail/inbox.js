@@ -148,9 +148,12 @@ function load_email(mailbox, id) {
 
     if (mailbox != 'sent') {
 
-      // Create archive/unarchive button
+      // Create archive/unarchive button and reply button
       const archButton = document.createElement('button');
+      const reply = document.createElement('button');
+      reply.innerHTML = 'Reply';
 
+      // Archive button functionality
       if (mailbox == 'inbox') {
         archButton.innerHTML = 'Archive';
 
@@ -185,8 +188,12 @@ function load_email(mailbox, id) {
         });
       }
 
-      // Insert at the beginning of the div 
-      displayEmail.insertBefore(archButton, displayEmail.childNodes[0]);
+      // Reply button functionality
+      reply.addEventListener('click', () => reply_email(email.sender, email.subject, email.body, email.timestamp));
+
+      // Insert buttons at the beginning of the div 
+      displayEmail.insertBefore(reply, displayEmail.childNodes[0]);
+      displayEmail.insertBefore(archButton, displayEmail.childNodes[1]);
     }
 
     // Append email to email-view
@@ -202,4 +209,25 @@ function load_email(mailbox, id) {
     })
   })
 
+}
+
+function reply_email(sender, subject, body, timestamp) {
+
+  // Show compose view and hide other views
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'block';
+
+  // pre-fill composition fields
+  document.querySelector('#compose-recipients').value = sender;
+  const composeSubject = document.querySelector('#compose-subject')
+  
+  // If replying to a reply, no need to add RE:
+  if (subject.substring(0, 3) == "RE:") {
+    composeSubject.value = subject;
+  } else {
+    composeSubject.value = "RE: " + subject;
+  };
+
+  document.querySelector('#compose-body').value = `On ${timestamp}, ${sender} wrote: ` + body;
 }
